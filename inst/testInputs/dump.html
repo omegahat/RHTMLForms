@@ -1,0 +1,455 @@
+ <html xml:lang="en-US" lang="en-US" xmlns:=http://www.w3.org/1999/xhtml>
+  <head>
+   <title>
+   WormBase Batch Sequences Dump
+   </title>
+   <base href="http://www.wormbase.org/db/searches/advanced/dumper" target="_top">
+   </base>
+   <link rel="stylesheet" type="text/css" href="/stylesheets/wormbase.css">
+   </link>
+  </head>
+  <body class="search">
+   <script type="text/javascript">
+   <!--function c(p){location.href=p;return false;}
+//-->
+   </script>
+   <table border="0" cellpadding="4" cellspacing="1" width="100%">
+    <tr>
+     <td bgcolor="#5870a3" align="center">
+      <a href="/" class="binactive">
+       <font color="#FFFF99">
+        <b>
+        Home
+        </b>
+       </font>
+      </a>
+     </td>
+     <td bgcolor="#5870a3" align="center">
+      <a href="/db/seq/gbrowse?source=wormbase" class="binactive">
+       <font color="#FFFFFF">
+       Genome
+       </font>
+      </a>
+     </td>
+     <td bgcolor="#5870a3" align="center">
+      <a href="/db/searches/blat" class="binactive">
+       <font color="#FFFFFF">
+       Blast / Blat
+       </font>
+      </a>
+     </td>
+     <td bgcolor="#5870a3" align="center">
+      <a href="/db/searches/info_dump" class="binactive">
+       <font color="#FFFFFF">
+       Batch Genes
+       </font>
+      </a>
+     </td>
+     <td bgcolor="#b4cbdb" align="center">
+      <a href="/db/searches/advanced/dumper" class="bactive">
+       <font color="#FFFFFF">
+       Batch Sequences
+       </font>
+      </a>
+     </td>
+     <td bgcolor="#5870a3" align="center">
+      <a href="/db/searches/strains" class="binactive">
+       <font color="#FFFFFF">
+       Markers
+       </font>
+      </a>
+     </td>
+     <td bgcolor="#5870a3" align="center">
+      <a href="/db/gene/gmap" class="binactive">
+       <font color="#FFFFFF">
+       Genetic Maps
+       </font>
+      </a>
+     </td>
+     <td bgcolor="#5870a3" align="center">
+      <a href="/db/curate/base" class="binactive">
+       <font color="#FFFFFF">
+       Submit
+       </font>
+      </a>
+     </td>
+     <td bgcolor="#5870a3" align="center">
+      <a href="/db/searches/search_index" class="binactive">
+       <font color="#FFFFFF">
+        <b>
+        More Searches
+        </b>
+       </font>
+      </a>
+     </td>
+    </tr>
+   </table>
+   <table cellpadding="0" width="100%" nowrap="1" cellspacing="1" border="0">
+    <tr valign="top" class="white" nowrap="1">
+     <td valign="MIDDLE" align="CENTER" width="50%">
+      <h3>
+      WormBase Release WS123
+      </h3>
+     </td>
+     <td align="right" cellspacing="1">
+      <a href="/">
+       <img>
+       </img>
+      </a>
+     </td>
+    </tr>
+   </table>
+   <br>
+   </br>
+   <h1>
+   Batch Sequences
+   </h1>
+   <form method="post" action="/db/searches/advanced/dumper" enctype="multipart/form-data">
+    <p>
+    Species:
+     <select name="species" onchange="submit()">
+      <option selected="selected" value="elegans">
+      C. elegans
+      </option>
+      <option value="briggsae">
+      C. briggsae
+      </option>
+     </select>
+    </p>
+    <table cellpadding="8" width="100%" cellspacing="4">
+     <tr class="searchtitle">
+      <th width="35%" class="searchtitle" align="left">
+      1. Input Options
+      </th>
+      <th width="30%" class="searchtitle" align="left">
+      2. Select one feature to retrieve
+      </th>
+      <th width="35%" class="searchtitle" align="left">
+      3. Output options
+      </th>
+     </tr>
+     <tr class="searchbody">
+      <td valign="top" align="center">
+       <table align="center">
+        <tr>
+         <td>
+         Type in a list of sequence or chromosome names:
+          <br>
+          </br>
+         e.g. &nbsp "AC3.8  M7  X  IV  III:1000..4000"
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <textarea name="list" rows="13" cols="30" wrap="off">
+          </textarea>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <br>
+          </br>
+          <em>
+          Or
+          </em>
+         upload a file with sequence or chromosome names separated by spaces:
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <input type="file" name="upload" size="20">
+          </input>
+         </td>
+        </tr>
+       </table>
+      </td>
+      <td valign="top" align="left">
+       <select name="feature" size="21">
+        <option value="BLASTX Hits">
+        BLASTX Hits
+        </option>
+        <option value="BLAT EMBL/GenBank Hits (Best)">
+        BLAT EMBL/GenBank Hits (Best)
+        </option>
+        <option value="BLAT EMBL/GenBank Hits (Other)">
+        BLAT EMBL/GenBank Hits (Other)
+        </option>
+        <option value="Briggsae alignments">
+        Briggsae alignments
+        </option>
+        <option value="Coding Segments">
+        Coding Segments
+        </option>
+        <option value="Complex Repeats">
+        Complex Repeats
+        </option>
+        <option value="Contig submissions">
+        Contig submissions
+        </option>
+        <option value="ESTs aligned by BLAT (best)">
+        ESTs aligned by BLAT (best)
+        </option>
+        <option value="ESTs aligned by BLAT (other)">
+        ESTs aligned by BLAT (other)
+        </option>
+        <option value="Expression chip profiles">
+        Expression chip profiles
+        </option>
+        <option value="Genbank entry">
+        Genbank entry
+        </option>
+        <option selected="selected" value="Gene Models">
+        Gene Models
+        </option>
+        <option value="GeneFinder Predictions">
+        GeneFinder Predictions
+        </option>
+        <option value="Links and Superlinks">
+        Links and Superlinks
+        </option>
+        <option value="Non-elegans ESTs">
+        Non-elegans ESTs
+        </option>
+        <option value="ORFeome Project Primers">
+        ORFeome Project Primers
+        </option>
+        <option value="ORFeome sequence tags (best)">
+        ORFeome sequence tags (best)
+        </option>
+        <option value="Obsolete gene models">
+        Obsolete gene models
+        </option>
+        <option value="Operons">
+        Operons
+        </option>
+        <option value="PCR Assays">
+        PCR Assays
+        </option>
+        <option value="RNAi experiments">
+        RNAi experiments
+        </option>
+        <option value="SAGE probes">
+        SAGE probes
+        </option>
+        <option value="SNPs, Knockouts & Other Alleles">
+        SNPs, Knockouts & Other Alleles
+        </option>
+        <option value="Simple Repeats">
+        Simple Repeats
+        </option>
+        <option value="Trans-splice acceptor">
+        Trans-splice acceptor
+        </option>
+        <option value="UTRs">
+        UTRs
+        </option>
+        <option value="YACs & Cosmids">
+        YACs & Cosmids
+        </option>
+        <option value="mRNAs aligned by BLAT (best)">
+        mRNAs aligned by BLAT (best)
+        </option>
+        <option value="mRNAs aligned by BLAT (other)">
+        mRNAs aligned by BLAT (other)
+        </option>
+        <option value="polyA sites and signal sequences">
+        polyA sites and signal sequences
+        </option>
+       </select>
+      </td>
+      <td valign="top" class="searchbody">
+       <b>
+        <i>
+        What to output?
+        </i>
+       </b>
+       <br>
+       </br>
+       <input type="radio" name="DNA" value="feature coordinates only">
+       </input>
+      feature coordinates only
+       <br>
+       </br>
+       <input type="radio" name="DNA" value="feature and flanking sequences" checked="checked">
+       </input>
+      feature and flanking sequences
+       <br>
+       </br>
+       <input type="radio" name="DNA" value="flanking sequences only">
+       </input>
+      flanking sequences only
+       <br>
+       </br>
+       <input type="radio" name="DNA" value="paste features back for further searches">
+       </input>
+      paste features back for further searches
+       <br>
+       </br>
+       <b>
+       Note:
+       </b>
+      The last option above allows users
+		   to paste results in the field in the
+       <b>
+       Input
+		   Options
+       </b>
+      panel for the next round of search.
+       <br>
+       </br>
+       <br>
+       </br>
+       <b>
+        <i>
+        Flanking sequence lengths:
+        </i>
+       </b>
+       <br>
+       </br>
+       <input type="text" name="flank5" value="0" size="6" maxlength="6">
+       </input>
+      bp 5' flank,
+       <input type="text" name="flank3" value="0" size="6" maxlength="6">
+       </input>
+      bp 3' flank
+       <br>
+       </br>
+       <br>
+       </br>
+       <b>
+        <i>
+        Coordinates relative to:
+        </i>
+       </b>
+       <br>
+       </br>
+       <input type="radio" name="relative" value="Chromosome" checked="checked">
+       </input>
+      Chromosome
+       <br>
+       </br>
+       <input type="radio" name="relative" value="Query sequence">
+       </input>
+      Query sequence
+       <br>
+       </br>
+       <br>
+       </br>
+       <b>
+        <i>
+        Sequence orientation:
+        </i>
+       </b>
+       <br>
+       </br>
+       <input type="radio" name="orientation" value="Relative to feature" checked="checked">
+       </input>
+      Relative to feature
+       <br>
+       </br>
+       <input type="radio" name="orientation" value="Always on canonical strand">
+       </input>
+      Always on canonical strand
+       <br>
+       </br>
+       <br>
+       </br>
+       <b>
+        <i>
+        Output format:
+        </i>
+       </b>
+       <br>
+       </br>
+       <input type="radio" name="dump" value="Plain TEXT" checked="checked">
+       </input>
+      Plain TEXT
+       <br>
+       </br>
+       <input type="radio" name="dump" value="HTML">
+       </input>
+      HTML
+       <br>
+       </br>
+       <input type="radio" name="dump" value="Save to disk (Plain TEXT)">
+       </input>
+      Save to disk (Plain TEXT)
+       <br>
+       </br>
+       <br>
+       </br>
+      </td>
+     </tr>
+     <tr class="searchtitle">
+      <td>
+       <input type="reset" name=".reset">
+       </input>
+      </td>
+      <td align="CENTER">
+       <input type="submit" name="DUMP" value="DUMP">
+       </input>
+      </td>
+      <td>
+      &nbsp
+      </td>
+     </tr>
+    </table>
+    <div>
+     <input type="hidden" name=".cgifields" value="feature">
+     </input>
+     <input type="hidden" name=".cgifields" value="orientation">
+     </input>
+     <input type="hidden" name=".cgifields" value="dump">
+     </input>
+     <input type="hidden" name=".cgifields" value="relative">
+     </input>
+     <input type="hidden" name=".cgifields" value="DNA">
+     </input>
+    </div>
+   </form>
+   <h3>
+   Bug fix: March 3, 2004
+   </h3>
+   <pre>
+   Sequences retrieved prior to March 3, 2004 may have been affected by a calculation error. This
+    problem, limited to flanking sequences of minus strand features, caused the 5' and 3' flanks to
+    be reported in reverse relative to the feature, and in some cases, reported on the plus strand.
+    We apologize for any difficulties this may have caused.
+
+    Users relying on output from Batch Sequences for experimental design are encouraged to verify 
+    the data first. Please report any problems to wormbase-help@wormbase.org.
+   </pre>
+   <p>
+   </p>
+   <hr>
+   </hr>
+   <hr>
+   </hr>
+   <table width="100%">
+    <tr>
+     <td class="small" align="left">
+      <a href="mailto:webmaster@www.wormbase.org">
+      webmaster@www.wormbase.org
+      </a>
+     </td>
+     <td class="small" align="right">
+      <a href="/copyright.html">
+      Copyright Statement
+      </a>
+     </td>
+    </tr>
+    <tr>
+     <td class="small" align="left">
+      <a href="/db/misc/feedback">
+      Send comments or questions to WormBase
+      </a>
+     </td>
+     <td class="small" align="right">
+      <a href="/privacy.html">
+      Privacy Statement
+      </a>
+     </td>
+    </tr>
+   </table>
+  </body>
+ </html>

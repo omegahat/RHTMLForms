@@ -1,0 +1,44 @@
+Modularity, reusability and extensibility are the goals.
+
+We should write the HTML parsing capabilities to return
+an object of class, say, HTMLFormDescription that provides
+a representation of the different elements of an HTML
+form. (It might return a list of such elements if there
+are multiple forms.)
+
+   The HTMLFormDescription material is much the same as we currently have it.
+   It describes the Form itself (i.e. URL, action), the different elements of the form
+   and identifies which are visible and which are hidden.
+   
+
+From this description of a form, we need to have a method to convert it to a function.
+(The syntax as( description, "function") would be nice.)
+The function might look something like the following
+
+<function name> =
+function( <arg1> = <default value>, <arg2> = <default value> ...., url = URL('http://host/file'))
+{
+   require(<run-time support library>)
+   
+   desc = <sets of possible values for the arguments> 
+
+   args = c(arg1=<arg1>, arg2=<arg2>, ...)
+   checkFormArgs( desc, args)
+
+   formQuery(argNames, POST | GET, [ContentDisposition=TRUE])
+}
+
+We can put checkFormArgs() and formQuery
+into their own functions rather than inlining them here.
+
+We can have methods for writing out these different parts of the function
+so that others can write specialized methods to customize these,
+e.g. to use a different HTTP query transmission mechanism or
+check the arguments or different set of required libraries.
+
+
+We probably want to have an argument which specifies the handler
+function for processing  the return value from the HTTP query
+and turns the HTML into something useful.  The creator of a
+function can provide a default for each function, but it is 
+convenient to allow the caller to override this.

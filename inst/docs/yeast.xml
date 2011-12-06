@@ -1,0 +1,98 @@
+
+http://db.yeastgenome.org/cgi-bin/SGD/seqTools for Yeast has 3 forms on the page.
+One is a simple text area for doing a quick search.
+This is at the top of the page, in the header.
+
+The second form object has a submit button above a paragraph of text
+and the remainder of the form is the meat of the page.
+
+The third form is merely a way to make suggestions
+to the designers of the page and is a form that is
+activated by link with a Javascript action.
+
+So the form in which we are interested is the middle one on the page
+but which appears as the third in the list of forms returned
+by <s:func>getHTMLFormDescription</s:func>.
+(The reason for this ostensibly strange ordering is that
+this 3rd form is, in fact, nested within the second form.)
+This is made more complex by the fact that there is a single
+form, but it is visually divided into three separate 
+blocks that are alternative input modes.
+In the browser, the "user" is directed to use one
+of the boxes (via the large red OR strings) .
+
+
+
+<s:code>
+library(odbAccess)
+yeastForm = getHTMLFormDescription("http://db.yeastgenome.org/cgi-bin/SGD/seqTools")
+yeast = createFunction(yeastForm[[3]])
+</s:code>
+<s:code>
+txt = g(seqname = "act1")
+</s:code>
+
+
+<s:code>
+yeastFormReader =
+function()
+{
+
+ links = list()
+  
+ tr = function(node) {
+
+   if(xmlSize(node) == 2 && xmlName(node[[2]][[1]]) == "a") {
+      name = xmlValue(node[[1]][[1]])
+      idx = seq(1, xmlSize(node[[2]]), by = 2)
+      links[[name]] <<- sapply(node[[2]][idx], function(x) xmlGetAttr(x, "href"))
+      names(links[[name]]) <<- sapply(node[[2]][idx], function(x) xmlValue(x))
+   }
+   node
+ }
+
+ list(tr = tr, links = function() links)
+}
+</s:code>
+
+
+Now, to download any of these, we can merely fetch the contents of the URI
+and parse that.
+
+<s:code>
+links = htmlTreeParse("/tmp/tt.html", handlers = yeastFormReader())$links()
+htmlTreeParse(links$DNA["FASTA"], handlers = getHTMLPre())$value()[1]
+</s:code>
+The handler function that extracts the PRE elements in the HTML page 
+is given by.
+<s:code>
+getHTMLPre = function()
+{
+  els = character()
+
+  pre = function(node) {
+     els <<- append(els, xmlValue(node))
+     node
+  }
+  list(pre = pre, value = function() els)
+}
+</s:code>
+
+Finally, we need to turn this into a DNA sequence.
+We can use the altcdfenvs package (if you can install it
+since it depends on other packages such as tcltk!!!)
+<s:code>
+txt = htmlTreeParse(links$DNA["FASTA"], handlers = getHTMLPre())$value()[1]
+dna = read.n.FASTA.entries(textConnection(txt), 1)
+</s:code>
+
+
+We could use getURL to fetch the contents of the URI
+but we have to parse it after that separately.
+There may be occassions when this is both necessary and useful,
+e.g. when we have to submit a password, use SSL, cookies, etc.
+
+
+
+
+g = createFunction(f[[3]])

@@ -1,0 +1,12 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}
+\BOOKMARK [1][-]{section.2}{Motivation}{}
+\BOOKMARK [1][-]{section.3}{Software architecture}{}
+\BOOKMARK [1][-]{section.4}{Implementation details}{}
+\BOOKMARK [1][-]{section.5}{Examples}{}
+\BOOKMARK [2][-]{subsection.5.1}{Example I: WormBase}{section.5}
+\BOOKMARK [3][-]{subsubsection.5.1.1}{Extracting C. elegans DNA sequence using WormBase.}{subsection.5.1}
+\BOOKMARK [3][-]{subsubsection.5.1.2}{Extracting DNA sequences for C. Briggsea orthologs of C. elegans genes.}{subsection.5.1}
+\BOOKMARK [2][-]{subsection.5.2}{Example II: UCSC Genome Browser}{section.5}
+\BOOKMARK [3][-]{subsubsection.5.2.1}{Extracting the locations of CpG islands and known genes from human genome}{subsection.5.2}
+\BOOKMARK [3][-]{subsubsection.5.2.2}{Extracting sequences of specific coordinates from human genome}{subsection.5.2}
+\BOOKMARK [1][-]{section.6}{Summary and discussion}{}

@@ -1,0 +1,46 @@
+import(RCurl)
+import(XML)
+
+#S3method(validateValue, HTMLCheckboxElement, HTMLRadioElement, HTMLSelectElement, HTMLTextAreaElement)
+export(createFunction, writeFunction)
+export(multiFormElementHandlers, formElementHandlers)
+export(formQuery, checkFormArgs)
+export(getHTMLFormDescription) # , getDynamicHTMLFormDescription)
+
+export(URI)
+
+
+export(validateValue)
+S3method(validateValue, HTMLCheckboxElement)
+S3method(validateValue, HTMLRadioElement)
+S3method(validateValue, HTMLTextAreaElement)
+S3method(validateValue, HTMLSelectElement)
+
+S3method(print, HTMLFormDescription)
+S3method(print, HTMLFormElement)
+
+
+# For the examples in the help file, currently.
+S3method(checkFormArgs, HTMLFormDescription)
+S3method(checkFormArgs, DynamicHTMLFormDescription)
+
+
+S3method(getDefaultValue, default)
+S3method(getDefaultValue, HTMLCheckboxElement)
+S3method(getDefaultValue, HTMLSelectElement)
+S3method(getDefaultValue, HTMLFileElement)
+S3method(getDefaultValue, HTMLTextAreaElement)
+
+
+# For developers building on top of this.
+export(mergeFormElements)
+export(getArgFormElements)
+export(htmlSelectElement, htmlTextAreaElement, htmlInputElement)
+
+
+# Not clear we really need these exported.
+if(FALSE) {
+   export(method)
+   S3method(method, HTMLFormDescription)
+   S3method("method<-", HTMLFormDescription)
+}

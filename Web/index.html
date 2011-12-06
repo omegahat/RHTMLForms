@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<link rel="stylesheet" href="http://www.omegahat.org/OmegaTech.css">
+<title>RHTMLForms</title>
+</head>
+
+<body>
+<h1>The RHTMLForms Package</h1>
+<p align=right><a href="RHTMLForms_0.5-1.tar.gz">RHTMLForms_0.5-1.tar.gz</a> (30 September 2011)</p>
+
+<p>
+This package allows us to read HTML documents and obtain a description
+of each of the forms it contains, along with the different elements
+and hidden fields. We can then programmatically generate
+an R function that allows us or others to treat the
+form as if it were an R function.
+</p>
+
+<p>
+The basic steps are
+<pre class="rcode">
+library(RHTMLForms)
+forms = getHTMLFormDescription("http://www.itis.gov/servlet/SingleRpt/SingleRpt")
+fun = createFunction(forms[[1]])
+o = fun(search_value = "dog")
+</pre>
+</p>
+
+<p> The package provides functionality to obtain descriptions of HTML
+forms and their elements.  It also provides run-time functionality for
+invoking the form, such as validating the arguments.  </p>
+
+<hr>
+<address><a href="http://www.stat.ucdavis.edu/~duncan">Duncan Temple Lang</a>
+<a href=mailto:duncan@wald.ucdavis.edu>&lt;duncan@wald.ucdavis.edu&gt;</a></address>
+<!-- hhmts start -->
+Last modified: Mon May 25 11:42:31 PDT 2009
+<!-- hhmts end -->
+</body> </html>

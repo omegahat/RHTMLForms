@@ -1,0 +1,22 @@
+
+http://db.yeastgenome.org/cgi-bin/SGD/seqTools for Yeast has 3 forms on the page.
+One is a simple text area for doing a quick search.
+This is at the top of the page, in the header.
+
+The second form object has a submit button above a paragraph of text
+and the remainder of the form is the meat of the page.
+
+The third form is merely a way to make suggestions
+to the designers of the page and is a form that is
+activated by link with a Javascript action.
+
+So the form in which we are interested is the middle one on the page
+but which appears as the third in the list of forms returned
+by <s:func>getHTMLFormDescription</s:func>.
+(The reason for this ostensibly strange ordering is that
+this 3rd form is, in fact, nested within the second form.)
+This is made more complex by the fact that there is a single
+form, but it is visually divided into three separate 
+blocks that are alternative input modes.
+In the browser, the "user" is directed to use one
+of the boxes (via the large red OR strings) .

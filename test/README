@@ -1,0 +1,8 @@
+The Perl script form1.pl provides a form handler that one can install
+in a cgi-bin area to test form submissions for simple GET requests
+(i.e. with the parameters encoded in the URL name).
+
+library(odbAccess)
+odbAccess(system.file("test","simple.html", package = "odbAccess"), "simple")
+source("simple.R")
+simple(.url = URI("http://www.omegahat.org/cgi-bin/form1.pl"))

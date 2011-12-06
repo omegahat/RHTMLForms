@@ -1,0 +1,318 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title></title>
+</head>
+
+<body>
+<h1></h1>
+
+<dl>
+  <dt>
+  <li> Trim the values in getHTMLFormDescription()
+  <dd>
+  
+  <dt>
+  <li> Dynamic forms whose "options" depend on particular values
+    e.g. wormbase.org and the choice of "species".
+  <dd>
+       Keep different sets of descriptions around and determine
+       which  to use based on the specification of the value that triggers the changes.
+
+      
+  <dt> HTMLImageElements
+  <dd> Allow only one to be used.
+      But want to be able to specify which one by just detecting
+      the name in the argument list, e.g.
+      for martview,  we have _new_new, stage_start and stage_filter.
+      We would like to be able to just say
+      stage_filter = TRUE and to have stage_filter.x and
+      stage_filter.y be included in the form post.
+  
+ 
+  <dt> MultiStage forms
+  <dd> E.g. Jean's example.
+
+ 
+  <dt> Use make.names instead of  fixNames.
+  <dd> Investigate why it is not behaving on my machines.
+
+     
+  <dt>
+  <li>Generate help for the function(s) we create automatically.
+  <dd>
+     Create a help object if we still have the code from the Doc
+     project and then serialize that (or not).
+
+
+  <dt> Provide feedback about arguments when the user doesn't supply one.
+  <dd>  Really want a help(myFunction) and for it to query the function.
+      
+
+  <dt> Make certain we are handling button and image elements properly.
+  <dd>
+      In the multi-form setup, buttons seem to be back.
+      But only as submit buttons and they are ignored when creating
+      the function.
+      We may actually want to handle buttons generally to get the
+      full form and then filter them.
+
+
+
+</dl>
+
+<h2>Low Priority</h2>
+<dl>
+ <dt>
+ <li> Create a package as we create one or more functions.
+ <dd>  We can leave this to the caller using  package.skeleton.
+     But we can provide a simple implementation.
+
+ <dt>
+ <li>Add facilities for user to customize the creation of the function(s).
+ Split the function creation code into pieces, separate functions
+ Introduce methods to allow people to extend the creation mechanism
+ rather than changing it.  We can use S4 classes (or even S3 for now)
+ to allow extensibility for different form types.
+
+<dd> Maybe this isn't very necessary since the functions are quite
+    simple
+    and people can write their own by mimicing ours.
+
+
+ <dt>
+ <li>Deal with encoding in getHTTPFormData.HTMLFileElement.
+ <dd> This is part of RCurl. However, we can use the form description
+     code here in RCurl for this purpose.
+
+
+  <dt> Create a separate package for the run-time material.
+  <dd>
+     
+</dl>
+
+
+<h2>Done</h2>
+
+<dl>
+
+  <dt>
+      Add a reader function argument to process the result.
+  <dd>
+       Need support for classes HTMLParseHandlerGenerator
+
+  
+  <dt> goStat example.
+  <dd>
+      Get the submit element in the POST request.
+
+  
+  <dt> Referer field.
+  <dd>
+  
+  <dt> Get the environment of the function from createFunction correct.
+  <dd> Huh? We make it the global environment.
+      Problem was that we changed a parameter in the newly created
+       function
+      after setting the environment, so the environment was also
+      changed again.
+  
+  <dt> Names on checkbox options
+  <dd>
+      These are present if the HTML is well formed,
+      e.g. &lt;input name type="checkbox"&gt;Some Text&lt;/input&gt;
+
+  
+  <dt>
+  <li> http and local file access.
+       Resolve the URI for the form by composing the relative action and the URI.
+       Merging of URIs 
+       move into http - use URIName like JMail
+   <dd>
+       Take the code from the httpClient package (or the code I put
+       into the s133 project.)
+
+
+  
+  <dt>
+  <li> Multiple forms in a single document.
+  <dd>
+       See
+<pre>      
+       h = multiFormElementHandlers()
+      invisible(htmlTreeParse("test/dual.html", handlers = h))
+      h$values()
+</pre>
+      Test this on many pages.
+
+
+      
+  <dt> Put a class on the generated function.
+  <dd>
+  
+
+  <dt> Clean up the formElementHandler to get rid of the fields we
+  don't  need (inputs and fixed)
+  <dd>
+     put classes on those that we can use (Done)
+<br>
+     Test this.
+
+  
+  <dt>
+  <li> Cleanup the options in the select (and others) to avoid the names.
+         option 
+           "Ha" 
+  <dd>
+      This comes out in the deparsing of the form description.
+
+      
+  <dt>
+  <li>Ensure that the validate arguments is working.
+  <dd>
+      <ul>
+	<li> Make certain all are valid.
+	    <br>
+             Seems okay, but need more test.
+	<li> Make sure we  have all of them.
+	    <br> Checking names match.
+
+      </ul>
+
+  
+  <dt>
+  <li> default argument values with multiple values as vectors.
+  <dd> e.g. several checkboxes.
+   <br>
+    Check that we are picking them up correctly in the
+      formElementHandler and not just overwriting the previous setting.
+<br>
+     We are now. Test on SpeakEasy.html
+
+  
+  <dt>
+  <li>Escape all quotes.
+  <dd> Is this done for us in our earlier processing?
+      Yes since we are now using deparse.
+
+  
+<dt>
+<li>Support writing to text, storing as an R object,
+   or creating a function  object directly.
+<dd> writeFunction and createFunction.
+
+
+  
+  <dt>
+  <li>Add an argument to the function to support CURL options.
+  <dd>
+
+  <dt>
+  <li>Error handling in checkFormArgs when all = TRUE
+  <dd>
+
+  <dt>
+  <li>Put default in of "" for HTMLFileElement so that we don't need to specify it. 
+  <dd>
+
+
+  <dt>
+  <li>
+      Handle the spaces, etc. in the Content-Disposition.
+
+  <dd>
+  Send list="AC3.8\240M7\240X\240IV\240III:1000..4000"
+   and not with simple spaces
+   RFC 2388
+    http://www.faqs.org/rfcs/rfc2399.html
+   See 2046 and 2047
+
+      <br>
+  RCurl takes care of this for us.
+      
+  <dt>
+  <li>   For wormbase, we only need/want to do this for the list field
+   and not for the others but it is not clear how we can infer this.
+   Is it because it is a text field and not a simple ? Seems to be.
+    (In other words don't send Plain TEXT as Plain= TEXT
+     but do send the AC3.8...... with the spaces identified as '= ')
+    Sending list in quotes works for the browser, but not for us.
+
+
+  <dd>
+
+   RCurl again!
+      
+
+  <dt>
+  <li>POST method of submission
+  <dd>
+
+      RCurl.
+
+  <dt>
+  <li>
+   Handle the  <input type="file"> element.
+    Change multipartFormQuery  in http.S in httpClient.      
+  <dd>
+      RCurl
+
+
+
+  <dt>  <li>Capitalize the HTTP method (e.g. Post or Get)
+  <dd>
+     RCurl.
+      
+  <dt>
+  <li>Check hidden fields.
+  <dd>
+
+  <dt>
+  <li>The handler functions need to handle multiple entries for the same form element name
+e.g. .cgifields in the www.wormbase.org.
+  Added code to do this but need to operate on the results differently.
+  <dd>
+
+
+  <dt>
+  <li>Hidden fields should not be put in the formal argument list.
+  <dd>
+
+
+      <dt>
+      <li>
+Format the code to make it easier to read.
+  And try to absorb as much as possible into run-time helper functions
+that we can test separately from the function.
+<dd>
+  
+
+  <dt>
+  <li>
+  The  URL is known when we compile the function so that gets 
+put in as a default value for the url argument.
+(I see that is there just NULL in the original default case. Now fixed
+so that we have the URL from the handlers.)
+It is handy to allow this be specified in the call so that we
+can use redirections  to other mirror sites.
+<dd>
+
+  <dt>
+  <li>
+  We'll replace the entire query construction by using classes
+from httpClient and its functions/methods to compose and send
+the query.
+<dd>
+      
+</dl>
+
+
+
+
+
+<hr>
+<address><a href="http://www.stat.ucdavis.edu/~duncan">Duncan Temple Lang</a>
+<a href=mailto:duncan@wald.ucdavis.edu>&lt;duncan@wald.ucdavis.edu&gt;</a></address>
+<!-- hhmts start -->
+Last modified: Thu Apr  1 06:38:56 PDT 2010
+<!-- hhmts end -->
+</body> </html>

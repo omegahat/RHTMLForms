@@ -1,0 +1,624 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title></title><link rel="stylesheet" href="http://www.omegahat.org/OmegaTech.css" type="text/css"></link><meta name="generator" content="DocBook XSL Stylesheets V1.74.0"></meta></head><body><div class="article" lang="en"><div class="titlepage"><div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Duncan</span> <span class="surname">Temple Lang</span></h3><div class="affiliation">Department of Statistics, UC Davis</div></div></div></div></div><hr></hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id643002"></a>Overview</h2></div></div></div><p>
+The basic idea of the online database access (odbAccess) is
+essentially to be able to turn an HTML form into an S function.
+Rather than having to manually interact with the form via a Web
+browser, S users can use the functionality of the form
+programmatically. This can be used to avoid manual intervention and
+can greatly simplify repetitive tasks.  It makes the process
+reproducible since it is programmatic rather than based on human
+actions.  And, importantly, it reduces the opportunity for error in
+transferring the inputs to the form, saving the ouptuts to a file and
+bringing them into R.  In short, it reduces the number of steps
+involved, while maintaining, at least, the same functionality.
+</p><p>
+The basic procedure is as follows.  To get programmatic access to the HTML form's functionality
+in R, we have the following steps.
+</p><div class="itemizedlist"><ul type="disc"><li><p>
+Identify the HTML page of interest.   We will assume that it contains
+only one HTML form. Some pages do house 2 or more forms and we will
+deal with this later.
+</p></li><li><p>
+We read the form using </p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">htmlTreeParse</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns=""> in the
+<i xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns=""><a href="s:package(%22XML%22)">XML</a></i> package.  We use the
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">formElementHandlers</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns=""> function to customize the
+parsing to collect a description of each of the HTML form elements in
+the page.  Having finished the parsing, we have an S object of class
+<i xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns=""><a href="HTMLFormDescription-class.html">HTMLFormDescription</a></i> which describes the entire
+form, i.e.  all its HTML form elements, its URI (if available),
+parameters for how to submit the form (e.g. the action).
+</p></li><li><p>
+From this description of the form, we construct an S function to mimic
+the HTML form. 
+</p><div class="itemizedlist"><ul type="circle"><li><p>
+ The function has formal arguments or parameters
+corresponding to the HTML form elements that one could change in the
+Web browser. For those HTML form elements that provide a default
+value, e.g. a selected radio button or checkbox, text in a textarea,
+or a selected menu item, we provide a default value for the
+corresponding parameter in our new function.  We put the parameters
+for those HTML form elements with no default setting first in our
+function definition so that the caller has to supply values for these
+but not necessarily the other parameters.
+</p><p>
+Note that we don't include the HTML elements that are "hidden"
+(i.e. &lt;input type="hidden"&gt;) in our parameter list.  One cannot
+set these in a browser, so one cannot specify them in our new
+function. They will be submitted along with the user's values as part
+of our request, however.
+</p></li><li>
+The body of the function is also quite simple.
+It does three things.
+
+<div class="itemizedlist"><ul type="square"><li>
+
+Firstly, it retrieves the description of the form.  (This can be
+stored in a separate R data file (.rda), as part of the function's
+environment or writtend directly into the body of the function if is
+generated as ASCII source.)
+</li><li>
+Secondly, it collects the arguments for the form elements
+and validates each of them.
+</li><li>
+Finally, it submits the form inputs as it would be in a regular Web
+browser.  It does this by sending an HTTP request to the URI
+associated with processing the form.  The return value from the
+function is the result from this submission.  One can customize this
+to process the response on the fly or after it is completely received
+from the Web server.  And what one does with this is, of course, up to
+the user.  We'll discuss some examples of how to establish filters for
+reading the results directly into useful R data structures.
+</li></ul></div></li></ul></div></li></ul></div><p>
+</p><p>
+An example will help make these steps more concrete and clear.  Let's
+take a simple sample HTML form at <a class="ulink" href="http://www.speakeasy.org/~cgires/perl_form.cgi" target="_top">http://www.speakeasy.org/~cgires/perl_form.cgi</a>.
+You might want to visit that page using your Web browser and submit
+the form to understand what it does and what it returns.  If we were
+to read the HTML, we would find that it contains six form elements.
+There is a textarea, a collection of radio buttons, a collection of
+checkboxes, and a pull-down menu.  The additional two elements are
+buttons for submitting and resetting the form. We don't have to worry
+about these as they don't correspond to actual inputs in a
+programmatic language. They are simply user interface controls.
+</p><p>
+
+The names of the four elements of interest are "some_text", "box",
+"choice", "radbut" and these are identified by the
+<span style="color: red">&lt;html:attribute&gt;NAME&lt;/html:attribute&gt;</span> attribute on the
+<span style="color: red">&lt;html:tag&gt;INPUT&lt;/html:tag&gt;</span> element in the HTML document.
+When we submit the form (via a Web browser or in R),
+we must provide values for each of these names.
+The values come from the form elements.
+Let's look at the radio buttons
+</p><div class="literallayout"><p><br></br>
+<br></br>
+ &lt;input type="radio" name="radbut" value="oop" checked&gt; Oop<br></br>
+ &lt;input type="radio" name="radbut" value="eep"&gt; Eep<br></br>
+ &lt;input type="radio" name="radbut" value="urp"&gt; Urp <br></br>
+<br></br>
+</p></div><p>
+We see the <span style="color: red">&lt;html:attribute&gt;name&lt;/html:attribute&gt;</span> attribute
+and also a different <span style="color: red">&lt;html:attribute&gt;value&lt;/html:attribute&gt;</span>
+for each button.  The text that we see in the browser
+is not what is actually submitted. Instead, it is the
+associated <span style="color: red">&lt;html:attribute&gt;value&lt;/html:attribute&gt;</span>.
+So if we clicked on the Eep button, we would
+be submitting
+<code xmlns="">radbut=eep</code>
+
+</p><p>
+Note also the <span style="color: red">&lt;html:attribute&gt;checked&lt;/html:attribute&gt;</span> on the first
+button. This means that it is selected by default. We can use this to
+provide a default value for our function.
+</p><p>
+
+At this point, we might think about writing the outline of the
+function.  We would start with a name for the function.  Any name will
+work, but let's call it </p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">perl.form.cgi</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">.  We
+are using the name of the script in the URI, discarding the prefix and
+changing the _ to a . so it can be used easily in S.  We do the same
+thing for each of the parameter names, i.e.  change the _'s to a . (or
+capitalize the words separate by the _, e.g. <i xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rarg">someText</i> for some.text).
+
+</p><p>
+So the first attempt at our function would be to define
+it something like the following:
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+perl.form.cgi = 
+function(some.text, box, choice, radbut = "oop")
+{
+
+}
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+
+Note that we provide a default value for <i xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rarg">radbut</i> since
+that was the checked radio button.
+</p><p>
+
+The next step is to find the description of the form.  Well, we have
+read the HTML manually. So now we would have to create the S objects
+that describe the HTML form and its elements.  Well, we can do this
+programmatically.  First, we create the machinery that will process
+the HTML elements and create S objects to describe the form. Then we
+parse the HTML file and extract the form description.
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+h = formElementHandlers("http://www.speakeasy.org/~cgires/perl_form.cgi")
+invisible(htmlTreeParse("http://www.speakeasy.org/~cgires/perl_form.cgi", handlers = h))
+form = h$values()
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+
+From this, we can find the names of the form elements:
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+names(f$elements)
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+</p><pre xmlns="" class="routput">
+[1] "some_text" "box"       "choice"    "radbut"   
+</pre>
+<p>
+as before.
+Looking at the <b xmlns:rs="http://www.omegahat.org/RS" xmlns:s="http://cm.bell-labs.com/stat/S4" xmlns="" class="$">radbut</b>
+element,
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+f$elements$radbut
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+</p><pre xmlns="" class="routput">
+$name
+[1] "radbut"
+
+$defaultValue
+[1] "oop"
+
+$options
+[1] "oop" "eep" "urp"
+
+attr(,"class")
+[1] "HTMLRadioElement" "HTMLFormElement" 
+</pre>
+<p>
+we see the default value is available to us.
+</p><p>
+The package provides a function (</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">createArgList</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">) to create the 
+argument list.
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+cat(createArgList(form$elements, form$url))
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+</p><pre xmlns="" class="routput">
+	 some.text,
+	 box,
+	 choice = 'Ha',
+	 radbut = 'oop',
+	 .url ='http://www.speakeasy.org/~cgires/perl_form.cgi'
+</pre>
+<p>
+So <i xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rarg">choice</i> and <i xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rarg">radbut</i> have default values.
+
+</p><p>
+Returning to the new function we are developing, we need to have the
+form description around.  Since we started with that (from the
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">htmlTreeParse</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns=""> call), we can serialize that to
+a file using the </p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">save</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns=""> command.
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+save(form, file = "perl.form.cgi.rda")
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+Then, in the function, we can load this object back into R.
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+e = new.env()
+load("perl.form.cgi.rda", envir = e)
+form = get("form", envir = e)
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+We can make this into a little function.
+</p><p>
+We, of course, have to worry about where the file is actually
+located. However, we will probably put this function into an R package
+and so we can find it in the <code class="filename">data</code> directory of the package, e.g.
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+data("perl.form.cgi", package = "myHTMLForm")
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+or
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+system.file("data", "perl.form.cgi.rda", package = "myHTMLForm")
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+
+</p><p>
+If we don't want to make this into a package for us or others to use
+in the future, we will probably elect simply to create the function
+directly in R.  In that case, the form description object can be
+stored in the environment of the function.
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+perl.form.cgi = 
+function(...)
+{
+
+}
+e = new.env()
+assign("form", form, envir = e)
+env(perl.form.cgi) = e
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+</p><p>
+At this point, we have seen several ways to store and retrieve the
+description of the form.  The next step is to gather the inputs to the
+HTTP request.  We could be cute and pass control to a general function
+that would process the function call with respect to the form
+description and work from there.  That unfortunately makes the
+mechanism somewhat obscure, especially when things go wrong and error
+messages are not entirely consistent.  So, following the
+KISS<sup>[<a id="id643316" href="#ftn.id643316" class="footnote">1</a>]</sup>
+principle, we will avoid this (at least for the present!).  Instead,
+we collect the arguments passed to the function corresponding to the
+form elements into a list.  We pass this and the additional values
+(the URI, the form description) to a general function that can
+dispatch the calls.
+
+</p><p>
+
+This general  function
+(</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">formQuery</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">)
+is then charged with 
+</p><div class="itemizedlist"><ul type="disc"><li>
+validating the arguments from the user,
+</li><li>
+combining the arguments with the hidden elements
+of the form to construct the inputs 
+for the submission,
+</li><li>
+and finally submitting the form query.
+In this last step, we have to determine the
+mechanism (POST or GET) to use to submit the form.
+</li></ul></div><p>
+
+</p><p>
+
+So, in summary, we use the following steps.
+</p><div class="itemizedlist"><ul type="disc"><li>
+We use <pre xmlns="" xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" class="rfunction">formElementHandlers</pre>
+<br xmlns="" xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude"> and
+<pre xmlns="" xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" class="rfunction">xmlTreeParse</pre>
+<br xmlns="" xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude"> to get the description of the
+form.
+</li><li>
+We call one of the functions to 
+create a function.
+</li><li>
+This function calls <pre xmlns="" xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" class="rfunction">formQuery</pre>
+<br xmlns="" xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude">
+to actual process the call and submit the query.
+</li></ul></div><p>
+
+
+
+</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id643378"></a>Examples</h4></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="id643384"></a>Simple</h5></div></div></div><pre xmlns="" xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" class="S">
+form = getHTMLFormDescription("http://www.speakeasy.org/~cgires/perl_form.cgi")
+z = createFunction(form)
+</pre>
+<br xmlns="" xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+Now we can access the form.
+<pre xmlns="" xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" class="S">
+z("Duncan", "box1")
+z("other", "box1, box2",  "eep")
+</pre>
+<br xmlns="" xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+Suppose we are interested in the header information
+or just want to observe what is going on in the HTTP requests.
+We can use libcurl options to customize the HTTP request.
+See the documentation for <i xmlns="" xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude"><a href="s:package(%22RCurl%22)">RCurl</a></i> and <pre xmlns="" xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" class="rfunction">curlOptions</pre>
+<br xmlns="" xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude">.
+
+<div xmlns=""><pre class="rcode">
+z("Duncan", "box1", verbose = TRUE, header = TRUE)
+</pre></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="id643410"></a>
+Examples
+</h5></div></div></div><p>
+We'll try to create a interface from R
+to Google. Just submitting a basic query 
+is not that challenging since there is only one
+input field - the text field in which one types the search string.
+The advanced search page is more interesting for many reasons.
+Firstly, there are many form elements.
+Secondly, there are many forms!
+</p></div><p>
+First, we ask for a description of Googles search 
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+google = getHTMLFormDescription("http://www.google.com/advanced_search?hl=en")
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+
+Note that when using </p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">getHTMLFormDescription</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">,
+there may be warnings generated. It is always a good idea to check
+these and verify that they are safe to ignore.  In most cases, the
+warnings are related to malformed HTML in the document containing the
+forms.  Even well-formed HTML often has HTML entities that are not
+properly specified or defined for the parser.
+</p><p>
+One should also be aware that the page we are downloading via
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">getHTMLFormDescription</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+<span class="emphasis"><em>may</em></span> be different from the one you see in your
+browser.  Indeed, the page may be different if you go to another
+browser (e.g. Mozilla rather than Opera or Microsoft's IE).  The
+reason for this is that the Web server can return pages based on the
+request it receives which provides a description of the requester via
+the User-Agent field.  Some sites customize the returned page to work
+"optimally" with that application. If it does not recognize this, then
+it may give a more generic page, sometimes with some features not
+present or differently implemented.  If one wants the exact page you
+see in a particular browser, one can specify the details of the
+request in the HTTP header via the <i xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns=""><a href="s:package(%22RCurl%22)">RCurl</a></i>
+options.
+</p></div><p>
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id643463"></a>Wormbase</h2></div></div></div><p>
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+library(odbAccess)
+ f = getHTMLFormDescription("http://www.wormbase.org/db/searches/advanced/dumper")
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+We get some warnings about the HTML in the page.
+
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+wormbase  = createFunction(f)
+x = wormbase("AC3.8  M7  X  IV  III:1000..4000")
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+
+The result is a single string
+</p><pre xmlns="" class="routput">
+&gt; length(x)
+[1] 1
+&gt; nchar(x)
+[1] 2497069
+</pre>
+<p>
+This takes a long time to complete.
+If you do this in a browser, it also
+takes a long time to download the
+<span class="emphasis"><em>full</em></span>
+page. It does however show the initial
+part as it is received which gives
+the impression that it is complete at that point.
+This is, however, 2 megabytes of text.
+
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+g("unc-30", feature="Expression chip profiles")
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+
+Unfortunately, this is a complicated function.
+When we select the species, the options for the other
+elements change.
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+form.briggsae = getHTMLFormDescription("http://www.wormbase.org/db/searches/advanced/dumper?species=briggsae")
+g.briggsae = createFunction(form.briggsae)
+g.briggsae("cb25.fpc2397", feature = "Genefinder genes")
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+</p><p>
+This returns the value as a single string.  This is because that is
+what the lower-level call to 
+submit the form uses 
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">basicTextGatherer</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns=""> to collect
+and return the chunks of the response
+as a single  string.
+We can, however, provide our own collector for the chunks.
+We might want to collect this into the separate chunks.
+Alternatively, we might want to explicitly process it
+as it arrives.
+</p><p>
+Let's consider the first of these, i.e. storing the response in
+chunks.  We can provide our instance of the
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">basicTextGatherer</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns=""> function.  We can ask the
+form submitter to call this for each chunk and then we can request the
+value ourselves with the appropriate argument to avoid collapsing the
+chunks into a single value.
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+h = basicTextGatherer()
+wormbase("AC3.8  M7  X  IV  III:1000..4000", writefunction = h$update)
+chunks = h$value(NULL)
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+</p><p>
+
+We could also use </p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">readLines</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns=""> to get the individual lines.
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+x = worbase("AC3.8  M7  X  IV  III:1000..4000")
+tmp = readLines(textConnection(x))
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+</p><p>
+Now let's think about processing the chunks as
+we encounter them.
+The data look something like
+</p><div class="literallayout"><p><br></br>
+<br></br>
+&gt;cTel54X.1 (cTel54X.1:508..272)<br></br>
+aaccttttgggaagaagtacattccaacaatgcatcttctggatctacggtaccatctcagttgaagttgcaagagtgttcaaacccaattattctggtg<br></br>
+gcgatgaatatgaattcgagtattttaacatgtataacaagtttctgatcagttgtgtcaaggctgaatctattggtttcagttggaaatttattattaa<br></br>
+gcaatgtgttgtgacgtccgcttgtaccatttgctga<br></br>
+&gt;cTel54X.1 (cTel54X.1:1765..1682)<br></br>
+ccaggatcacatttcccctactctttccgatatgcccacagagatccttggtcaagtattggaaaagctaaagccagtggatca<br></br>
+&gt;cTel54X.1 (cTel54X.1:1918..1818)<br></br>
+atggtaacaatcagccgagaagcccgacgtgctctgactgaagaacgtggagctgaacttgacaaatggtgggcaattaattttgtgcgatatatgaatt<br></br>
+t<br></br>
+<br></br>
+</p></div><p>
+If we had all the lines, we might break these up into blocks by
+finding the indices of the lines starting with '&gt;'
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id643565"></a>Multi-Form pages</h2></div></div></div><p>
+Some pages have multiple forms.  We have to parse these slightly
+differently to obtain the form descriptions.  Rather than accumulating
+all the form elements in a single location, we have to put them with
+the right form.  There are several approaches to doing this.  One is
+to bring the entire page into R as a tree and then to recursively
+descend that find the different forms.  This is a very different
+procedure than the one we used for a page with a single form, so we
+would prefer not to use this.  It is also slightly inelegant code.
+Another approach is to use <i xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rarg">handlers</i> argument the
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">htmlTreeParse</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns=""> function again.  We can
+separate the code that was originally in the HTML form handlers as
+basic constructors and updating state.  Basically, most of the
+functions prepared some object and then assigned it to the list of
+elements.  These are clearly two separate tasks, and the first can be
+reused.  When processing multiple forms, we want to process the
+individual form elements but not assign them to anywhere local.
+Instead, we want to put them back into the XML tree.  Then, when we
+hit the <span style="color: red">&lt;html:tag&gt;FORM&lt;/html:tag&gt;</span> element, we want to fetch only those
+elements.
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id643586"></a>Dynamic Forms</h2></div></div></div><p>
+There is one important aspect of forms that we haven't yet
+covered in our discussion about how this mechanism works.
+Certain forms are "dynamic"
+ in the sense that changing a value on the form causes it to 
+ dynamically determine different possible values for  the other
+ form elements.
+The <a class="ulink" href="http://www.wormbase.org/db/searches/advanced/dumper" target="_top">wormbase dumper </a>
+is an example of this 
+where one can change the species from C. elegans to C. briggsae and
+the possible feature sets that one can query is updated in the
+new view of the form.
+This is actually done by submitting the form with the new species selection
+and retrieving a new HTML document with the new form elements.
+</p><p>
+
+What this means for us is that the set of valid inputs are dependent
+on values for the other inputs.  To handle this at run time, we want
+to have the names of the elements whose values alter the possible
+values of other elements.  Let's start with the simple case of the
+wormbase dumper form above.  This is remarkably simple. There is only
+one element that causes the form to be updated. This is the species
+menu which has only two possible values - elegans and briggsae.  For
+each of these two possible values, we could store the form elements
+that make sense for the particular value.
+</p><p>
+For species, we want a list with a form description for briggsae and
+another one for elegans.
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+u = odbAccess:::mergeURI(URI(f$formAttributes["action"]), URI(f$url))
+description = list()
+
+for(i in names(f$elements$species$options)) {
+  o = formQuery(list(species = i), toString(u), f$elements, f$formAttributes, .checkArgs = FALSE)
+  descriptions[["species"]][[i]]  = getHTMLFormDescription(o, asText = TRUE)
+}
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+
+The general function for the HTML form has access to this description.
+As it processes the arguments in the call, it descends down the
+different paths.  As it processes the species argument, it validates
+this against the possible values for this element in the regular form
+description.  Based on the value for species, it then looks
+at the remaining form elements from the form description for that value
+of species.
+</p><p>
+
+There are two possibilities.  One is that the set of elements remain
+the same in the form and only the values change.  And a second is that
+the set of elements change.  The latter is the more complicated
+situation.  We can accomodate both using the model for the second
+case.  If we have a list of dynamic form elements
+(<i xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns=""><a href="DynamicHTMLFormElementsList-class.html">DynamicHTMLFormElementsList</a></i>), then
+we process these by branching sequentially.
+
+
+</p><p>
+
+If the set of parameters (rather than possible values) change
+dynamically based on a value for one parameter, the interface is quite
+complicated.  For example, suppose that we have a form with an option
+A or B (e.g. in a menu or radio button).
+Selecting A means that one specifies a value for 
+a parameter named height.
+Otherwise, if B is selected, one provides a value for weight.
+If we were to map this to a function in R using
+the scheme described above we would have a function
+of the form
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="S">
+function(option, height, weight)
+{
+  if(option == "A")
+    args = list(height = height)
+  else  if(option == "B")
+    args = list(weight = weight)
+}
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+This is not exceedingly complex, but one can see that the complexity
+increases rapidly if there are more form elements to deal with. For
+example, suppose that if we select B, we not only specify weight, but
+age and occupation.  But if we select A, we provide values for height,
+weight and date of birth.  In this case, one might reasonably argue
+that the HTML form is itself overly complicated. However, it does
+provide dynamic, visual information about what is expected that can
+guide the user interactively.  For an S function, there are no such
+dynamic cues. Instead, the user is faced with a flat collection of
+possible arguments which are in fact grouped and inter-dependent in a
+complex fashion.  In many respects, it makes more sense to have
+different functions for different possible options, e.g. one for A and
+one for B where the arguments are all logically related.  For this
+reason, we do not provide support for converting these types of
+dynamic, complex forms into S functions.  The infrastructure is
+present in the package so that this could be done relatively easily,
+but they are not .
+
+</p><p>
+
+Now that we have discussed the basic idea of dynamic forms, let's turn
+our attention to how things are done in the software.  The
+<i xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rarg">checkDynamic</i> for the form element handler functions
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">formElementHandlers</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns=""> and
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">multiFormElementHandlers</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns=""> controls whether we
+further resolve the form description to check whether it is a dynamic
+form.  If it is a dynamic form, we add an object that provides
+information about the different options and the resulting possible
+values for the different inputs. This is used when validating the
+inputs to the S function.  If one does not want the dynamic
+information (which can be slow to fetch as it requires a request to
+the HTTP server to submit the form for each option of the dynamic
+element), one can avoid the computations by passing creating the
+handler instance oneself with <i xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rarg">checkDynamic</i> passed as
+<i xmlns:rs="http://www.omegahat.org/RS" xmlns:s="http://cm.bell-labs.com/stat/S4" xmlns=""><code>FALSE</code></i>.
+
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id643682"></a>Limitations</h2></div></div></div><p>
+Currently, there are two fundamental limitations that our approach
+cannot deal with.  The first is that we do not (and will not) attempt
+to handle forms that rely on JavaScript code.  It is conceivable that
+we could do something to handle this (e.g. embed a JavaScript
+interpreter), but we most likely will not.  We do however recognize
+the simplest of JavaScript commands - submit - within certain types of
+elements of a form to identify whether the form is dynamic.
+</p><p>
+The second limitation is the dynamic forms.
+If the contents of the form elements change in response to
+selecting a particular value of one element,
+there can be issues.
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id643713"></a>Notes</h2></div></div></div><p>
+Merge the URI with the action URI when we process the
+form, not at run-time.
+If the user specifies the URI at run-time, leave
+it alone and demand the entire thing.
+</p></div><div class="footnotes"><br></br><hr width="100" align="left"></hr><div class="footnote"><p><sup>[<a id="ftn.id643316" href="#id643316" class="para">1</a>] </sup>Keep It Simple, Dumbass!</p></div></div></div></body></html>

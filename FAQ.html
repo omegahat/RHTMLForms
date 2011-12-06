@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>FAQ for RHTMLForms</title>
+</head>
+
+<body>
+<h1>FAQ for the RHTMLForms Package</h1>
+
+<dl>
+  <dt> The default values are not being read correctly from
+      the HTML document. The elements have default values
+      visible in both the browser and the HTML document.
+      But when we create the function, they are not there.
+  <dd>
+      The problem is most likely to be not entirely correct,
+      but colloquial,  HTML.
+      Often people use attributes such as 
+      <b>checked</b> or <b>selected</b> by itself rather than
+      specifying a value. For example,
+<pre>
+      &lt;option name="foo" selected&gt;
+
+      &lt;input type="radio" name="bar" checked&gt;
+</pre>      
+      The HTML parser in some versions of libxml
+      do not handle this in the way we might want.
+      (It is technically incorrect, so it is not really a bug in libxml.)
+
+
+  <dt>
+      When I create a function from a form and call it, I keep getting
+      back the same page!
+      
+  <dd>
+      The URI <a
+      href="http://gostat.wehi.edu.au/cgi-bin/goStat.pl">http://gostat.wehi.edu.au/cgi-bin/goStat.pl</a>
+      exhibits this behavior. From what we have deduced, we need to
+      include  the Submit form element in the <code>POST</code>ing of
+      the form. Then and only then do we get back the correct answer.
+</dl>
+
+
+
+<hr>
+<address><a href="http://www.stat.ucdavis.edu/~duncan">Duncan Temple Lang</a>
+<a href=mailto:duncan@wald.ucdavis.edu>&lt;duncan@wald.ucdavis.edu&gt;</a></address>
+<!-- hhmts start -->
+Last modified: Sun Aug 22 17:56:13 PDT 2004
+<!-- hhmts end -->
+</body> </html>

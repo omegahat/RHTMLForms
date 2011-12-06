@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title></title>
+</head>
+
+<body>
+<h1></h1>
+
+<h2>Version 0.5-0</h2>
+<dl>
+  <dt>
+  <li> Made the processing of the extra arguments that are in the URL
+       rather than the form an option via processURLArgs parameter.
+  <dd>
+</dl>  
+
+<h2>Version 0.5-0</h2>
+<dl>
+  <dt>
+  <li> Added ability to specify a curl handle in the invocation of the form.
+  <dd>
+  <dt>
+  <li> Handle the case where the URL for the page containing the
+      form(s) is actually a form itself, i.e. has http://...?arg=val&amp;arg=val...
+  <dd>
+</dl>
+
+<h2>Version 0.4-7</h2>
+<dl>
+  <dt>
+  <li>  Renamed the url parameter in the generated function .url to
+      avoid conflicts with the names of form elements.
+      Identified by Vanessa De Wit.
+  <dd>
+</dl>
+
+
+<h2>Version 0.4-6</h2>
+<dl>
+  <dt>
+  <li>  Support for textarea elements when processing the
+      form. Omitted accidentally. Identified by Vanessa De Wit.
+  <dd>
+</dl>
+
+<h2>Version 0.4-5</h2>
+
+<dl>
+  <dt>
+  <li>  Correction for fixURL to avoid repeating the query part of the URL.
+  <dd>
+  <dt>
+  <li>  Back-quoting names of parameters in forms that have non-legal
+        characters for R parameters, e.g. '$', '-', '@', '!', '#', '%'.
+  <dd>
+</dl>
+
+<h2>Version 0.4-4</h2>
+<dl>
+  <dt>
+  <li> Handle when we process button elements that do not have a name or id attribute.
+  <dd>
+</dl>
+
+<h2>Version 0.4-3</h2>
+<dl>
+  <dt>
+  <li> Recognize Button, etc. where the type attribute is
+      capitalized. 
+  <dd> Reported by Jaanus.
+</dl>
+
+
+<h2>Version 0.4-2</h2>
+<dl>
+  <dt>
+  <li> Merge the query part of the action into the form's URL,
+      i.e. any part after the '?', even in a POST form.
+  <dd>
+</dl>
+
+<h2>Version 0.4-1</h2>
+<dl>
+  <dt>
+  <li> Handling of id attributes rather than name attributes on form elements.
+  <dd>
+
+  <dt>
+  <li> Improvements on checkboxes.
+  <dd>
+</dl>
+
+<h2>Version 0.4-0</h2>
+<dl>
+  <dt>
+  <li> createFunction()/writeFunction() and the generated function
+      allows a reader function to be specified as "AsIs", i.e. with
+      I(myFunction),
+       in which case it is passed the text from the HTTP request
+       and not the parsed HTML document or used as handler functions.
+  <dd>
+</dl>
+
+<h2>Version 0.3-0</h2>
+<dl>
+  <dt>
+  <li> Warning if the base URL is not available for relative action
+      URLs
+  <dd>
+
+  <dt>
+  <li> Trim the values of possible form element inputs/values.
+      
+  <dd>
+      
+ <dt>
+ <li> test/itis.R
+ <dd>
+
+ <dt>
+ <li> Cleaned up documentation
+ <dd>
+
+ <dt>
+  <li> Use XPath to get form elements
+ <dd>
+
+ <dt>
+ <li> Merge radio buttons with same name into  a single form description element.
+ <dd>
+ <dt>
+ <li> Made old parsing approach available via getHTMLFormDescriptionViaHandlers().
+ <dd>
+
+
+</dl>
+
+
+<dl>
+  <dt> Allow one to specify which form elements to use when creating
+     the function in <code>createFunction</code>.
+  <dd>
+
+  <dt> Use only the last HTMLImageElement in the form.
+  <dd>
+
+  <dt> Provide an addSubmit argument to createFunction and
+       writeFunction so as to control whether the submit
+       value is added to the form submission.
+  <dd>
+</dl>
+
+
+<hr>
+<address><a href="http://www.stat.ucdavis.edu/~duncan">Duncan Temple Lang</a>
+<a href=mailto:duncan@wald.ucdavis.edu>&lt;duncan@wald.ucdavis.edu&gt;</a></address>
+<!-- hhmts start -->
+Last modified: Fri Sep 30 15:00:21 PDT 2011
+<!-- hhmts end -->
+</body> </html>
