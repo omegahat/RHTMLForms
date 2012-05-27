@@ -1,5 +1,5 @@
 Package: RHTMLForms
-Version: 0.5-1
+Version: 0.5-2
 Title: Programmatically create R functions corresponding to Web/HTML forms.
 Author: Duncan Temple Lang
        Sunduz Keles

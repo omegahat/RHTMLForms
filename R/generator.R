@@ -80,7 +80,7 @@ function(formDescription, funcName,
    arglist = createArgList(formDescription, formDescription$url, reader = reader, isPost = isPost)
      # Really want to synchronize these.
    argNames = names(getArgFormElements(els))
-   argNames = escapeArgNames(argNames)
+#   argNames = escapeArgNames(argNames)
 
 
      # allow the caller to provide a connection onto which we will write the
@@ -107,7 +107,10 @@ function(formDescription, funcName,
            file = con)
    }
 
-   cat("\targs = list(\n", paste(paste("\t\t", "'", argNames, "'", sep=""), fixNames(argNames), sep=" = ", collapse=",\n"),
+   cat("\targs = list(\n", paste(paste("\t\t", "'", argNames, "'", sep=""),
+                                 #fixNames(argNames),
+                                 escapeArgNames(argNames),
+                                 sep=" = ", collapse=",\n"),
                      ")\n\n",
         file = con)
    
