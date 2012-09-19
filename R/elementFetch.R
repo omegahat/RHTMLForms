@@ -99,7 +99,7 @@ function(url = NULL, checkDynamic = TRUE, dropButtons = TRUE)
     tmp =  list(elements = elements,
                 form = formAttrs, 
                 url = url,
-                hidden = hidden,
+                hidden = hidden
                )
 
     class(tmp) <- "HTMLFormDescription"  # S3 class for the moment.

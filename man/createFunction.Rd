@@ -16,12 +16,14 @@
 \usage{
 createFunction(formDescription, url = character(), verbose = FALSE,
                 formElements = NULL, addSubmit = TRUE, reader = NULL,
-                 processURLArgs = formDescription$formAttributes["method"] == "POST")
+                 processURLArgs = (formDescription$formAttributes["method"] == "POST"),
+                  cleanArgs = NULL)
 writeFunction(formDescription, funcName, reader = NULL,
                url = character(), con = paste("/tmp/", funcName, ".R", sep = ""),
                insertFormDescription = TRUE, verbose = FALSE,
                 formElements = NULL, addSubmit = TRUE,
-                 processURLArgs = formDescription$formAttributes["method"] == "POST")
+                 processURLArgs = formDescription$formAttributes["method"] == "POST",
+                  cleanArgs = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -93,6 +95,18 @@ writeFunction(formDescription, funcName, reader = NULL,
     URL to actual arguments added to the call to
     \link[RCurl]{getForm} or \link[RCurl]{postForm}.
   }
+  \item{cleanArgs}{a function that can be used to process all of the
+  arguments in  a call to a form before it is sent. This gives the
+  \dQuote{caller} (or programmer) an opportunity to transform the
+  values provided by the caller into an appropriate form
+  and also to create new arguments. For example, we might have
+  the user specify the year, month and day of interest
+  and in the \code{cleanArgs} function, map this to a POSIXt value
+  and set that as a hidden or additional argument to the form.
+  See
+  \code{http://www.transtats.bts.gov/DL_SelectFields.asp?Table_ID=236}
+  for an example.
+  }  
 }
 \details{
   This writes the text of the function to a connection.

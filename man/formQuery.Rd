@@ -19,7 +19,7 @@
 formQuery(args, url, formDescription, ...,
           .extraArgs = character(), .opts = list(),
            .checkArgs = TRUE, .addSubmit = TRUE, style = "POST",
-             curl = getCurlHandle())
+             curl = getCurlHandle(), .cleanArgs = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -58,6 +58,18 @@ formQuery(args, url, formDescription, ...,
       can reuse a connection across multiple calls.
       This facilitates working with cookies from a login and reused in
       subsequent requests.}
+  \item{.cleanArgs}{a function that can be used to process all of the
+  arguments in  a call to a form before it is sent. This gives the
+  \dQuote{caller} (or programmer) an opportunity to transform the
+  values provided by the caller into an appropriate form
+  and also to create new arguments. For example, we might have
+  the user specify the year, month and day of interest
+  and in the \code{.cleanArgs} function, map this to a POSIXt value
+  and set that as a hidden or additional argument to the form.
+  See
+  \code{http://www.transtats.bts.gov/DL_SelectFields.asp?Table_ID=236}
+  for an example.
+  }      
 }
 \details{
 

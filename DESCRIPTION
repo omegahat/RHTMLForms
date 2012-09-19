@@ -1,5 +1,5 @@
 Package: RHTMLForms
-Version: 0.5-2
+Version: 0.6-0
 Title: Programmatically create R functions corresponding to Web/HTML forms.
 Author: Duncan Temple Lang
        Sunduz Keles
@@ -19,6 +19,7 @@ Note: The original code is quite old, but was never released. It uses XML handle
   different. The concepts remain as relevant now. The most recent example is in
   the help page for createFunction.
 Imports: RCurl (> 1.3-0), XML
-License: GPL version 2 or newer
+Depends: methods
+License: GPL-2
 URL: http://www.omegahat.org/RHTMLForms
 

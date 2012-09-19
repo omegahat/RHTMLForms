@@ -21,7 +21,7 @@
 \usage{
 createArgList(formDescription, url = character(),
                  defaultCurlOptions = getDefaultFormCurlOptions(formDescription, url),
-                 reader = NULL, isPost = FALSE)
+                 reader = NULL, isPost = FALSE, cleanArgs = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -52,6 +52,18 @@ createArgList(formDescription, url = character(),
     processed is a GET or POST. If it is a POST (i.e. \code{TRUE})
     then we add a style argument to the function that interfaces to this
     form.}
+  \item{cleanArgs}{a function that can be used to process all of the
+  arguments in  a call to a form before it is sent. This gives the
+  \dQuote{caller} (or programmer) an opportunity to transform the
+  values provided by the caller into an appropriate form
+  and also to create new arguments. For example, we might have
+  the user specify the year, month and day of interest
+  and in the \code{cleanArgs} function, map this to a POSIXt value
+  and set that as a hidden or additional argument to the form.
+  See
+  \code{http://www.transtats.bts.gov/DL_SelectFields.asp?Table_ID=236}
+  for an example.
+  }
 }
 \value{
   A string that can be used as the definition of the signature
