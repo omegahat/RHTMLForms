@@ -18,7 +18,7 @@ Class \code{"\linkS4class{vector}"}, by class "list", distance 2.
       can use the resulting subset of inputs/parameters as a
       \code{HTMLFormElementList} object also.
 	 }
-}
+}}
 \author{
 Duncan Temple Lang
 }

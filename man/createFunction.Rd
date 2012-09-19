@@ -150,11 +150,11 @@ function(txt)
             names = sapply(nodes, xmlValue))
 }
 
-g("foo", .reader = I(readGoogleResults))
+g("foo", .reader = readGoogleResults)
 
   # or we can specify our handler when creating the function
   # so that callers don't have to specify it.
-g = createFunction(f[[1]], reader = I(readGoogleResults))
+g = createFunction(f[[1]], reader = readGoogleResults)
 
 
 f = getHTMLFormDescription("http://www.usbr.gov/gp/agrimet/station_bftm_bigflatturner.cfm",
