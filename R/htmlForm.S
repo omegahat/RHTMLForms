@@ -1,3 +1,9 @@
+usesJS = usesJavaScript =
+function(form)
+{
+   any(sapply(form$elements, inherits, "DynamicHTMLFormElement"))
+}
+
 getHTMLFormElement =
 function(node, name = xmlName(node), dropButtons = TRUE)
 {
@@ -25,9 +31,11 @@ function(x)
 {
     name = getElementName(x)
 
+    optNodes = getNodeSet(x, ".//option")
+
          # The value of the option is either the "value" attribute or
          # the text within the option.
-    vals = xmlSApply(x, function(x) {
+    vals = sapply(optNodes, function(x) {
                             val = xmlGetAttr(x, "value", xmlGetAttr(x, "VALUE", NA))
                             if(is.na(val))
                               val = xmlValue(x)
@@ -36,7 +44,7 @@ function(x)
                         })
 
       #XXX really should only deal with <option> elements.
-    txt = xmlSApply(x, xmlValue)
+    txt = sapply(optNodes, xmlValue)
     names(txt) = vals
     names(vals) = vals
 
@@ -46,7 +54,7 @@ function(x)
 
 
        #get which are selected
-    selection = xmlSApply(x, function(x) 
+    selection = sapply(optNodes, function(x) 
                                  !is.na(xmlGetAttr(x, "selected", xmlGetAttr(x, "SELECTED", NA)))      
                          )
 
@@ -62,9 +70,9 @@ function(x)
 
 
     # Now look for a onchange = submit() call to determine if we have to fetch
-    # a different form 
-    onchange = xmlGetAttr(x, "onchange", xmlGetAttr(x, "ONCHANGE", NA))
-    if(!is.na(onchange) && length(grep("submit", onchange))) {
+    # a different form
+    onchange = xmlGetAttr(x, "onchange", xmlGetAttr(x, "onChange", NA))
+    if(!is.na(onchange)) { # && length(grep("submit", onchange))) {
       el$onChange = TRUE
       class(el) <- c(class(el), "DynamicHTMLFormElement")
     }

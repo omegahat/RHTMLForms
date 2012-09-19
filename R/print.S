@@ -1,11 +1,11 @@
 print.HTMLFormDescription =
-  function(x, ...)
+  function(x, showHidden = FALSE, ...)
 {
   cat("HTML Form:", x$url, "\n")
   for(i in names(x$elements)) {
     el = x$elements[[i]]
-    if(!inherits(el, c("HTMLResetElement", "HTMLHiddenElement")))
-      print(el, ...)
+    if(!inherits(el, c("HTMLResetElement", if(!showHidden) "HTMLHiddenElement")))
+       print(el, ...)
   }
 
 }
@@ -13,7 +13,7 @@ print.HTMLFormDescription =
 print.HTMLFormElement =
 function(x, ...)
 {  
-    cat(x$name, ":")
+    cat(x$name, ": ", sep = "")
     if("defaultValue" %in% names(x) && !is.na(x$defaultValue))
        cat("[", x$defaultValue, "]  ")
 

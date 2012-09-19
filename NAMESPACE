@@ -9,6 +9,9 @@ export(getHTMLFormDescription) # , getDynamicHTMLFormDescription)
 
 export(URI)
 
+exportMethods("[")
+exportClass("HTMLFormElementsList")
+S3method(`[`, HTMLFormElementsList)
 
 export(validateValue)
 S3method(validateValue, HTMLCheckboxElement)
@@ -44,3 +47,5 @@ if(FALSE) {
    S3method(method, HTMLFormDescription)
    S3method("method<-", HTMLFormDescription)
 }
+
+export(usesJavaScript, usesJS)

@@ -12,7 +12,7 @@ createArgList =
   #
   # This converts the names from HTML names to R names.
 function(formDescription, url = character(), defaultCurlOptions = getDefaultFormCurlOptions(formDescription, url),
-          reader = NULL, isPost = FALSE)
+          reader = NULL, isPost = FALSE, cleanArgs = NULL)
 {
     # Force these.
    defaultCurlOptions
@@ -24,6 +24,9 @@ function(formDescription, url = character(), defaultCurlOptions = getDefaultForm
 
      # Now identify the form elements that have a default and that are hidden
    isHidden = sapply(desc, function(x) inherits(x, "HTMLHiddenElement"))
+
+   if(length(desc) == 0)
+     isHidden = logical()
 
 
      # the default values for the parameters with parameters.
@@ -59,7 +62,8 @@ function(formDescription, url = character(), defaultCurlOptions = getDefaultForm
            ".formDescription = NULL", 
            paste(".opts = ", paste(deparse(defaultCurlOptions), collapse="\n")),
            if(isPost) "style = 'POST'",
-           ".curl = getCurlHandle()"
+           ".curl = getCurlHandle()",
+           paste(".cleanArgs = ",  paste(deparse(cleanArgs), collapse= "\n"))           
           ),
          collapse = ",\n")
 }

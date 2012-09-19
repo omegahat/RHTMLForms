@@ -67,9 +67,10 @@ checkFormArgs.HTMLFormDescription <-
 function(desc, args, all = TRUE,
           ehandler = function(err) {
             if(all)
-              errors <<- append(errors, err)
+              errors[[length(errors) + 1L]] <<- err #append(errors, err)
             else
               stop(err)
+            err
           }
          )
 {
@@ -82,7 +83,7 @@ function(desc, args, all = TRUE,
  if(!inherits(desc, "HTMLFormElementsList"))
    stop("checkFormArgs requires an object of class HTMLFormElementList as the first argument.")
   
- errors = character()
+ errors = list()
 
   # Check that all the arguments correspond to form elements.
   # Currently, we don't check that all form elements have an argument so that this

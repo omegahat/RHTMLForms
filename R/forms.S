@@ -7,7 +7,7 @@
 #
 
 formQuery =
-function(args, url, formDescription, ..., .extraArgs = character(), .opts = list(), .checkArgs = TRUE, .addSubmit = TRUE, style = 'POST', curl = getCurlHandle())
+function(args, url, formDescription, ..., .extraArgs = character(), .opts = list(), .checkArgs = TRUE, .addSubmit = TRUE, style = 'POST', curl = getCurlHandle(), .cleanArgs = NULL)
 {
     # library(RCurl)
 
@@ -55,6 +55,8 @@ function(args, url, formDescription, ..., .extraArgs = character(), .opts = list
     if(length(.extraArgs))
         args[names(.extraArgs)] = .extraArgs
 
+    if(!is.null(.cleanArgs))
+        args = .cleanArgs(args, formDescription)
 
        # Use GET or POST to submit
        # See 
@@ -69,6 +71,23 @@ function(args, url, formDescription, ..., .extraArgs = character(), .opts = list
 }
 
 
+setOldClass(c("HTMLFormElementsList", "list"))
+
+`[.HTMLFormElementsList` = function(x, i, j, ..., drop = FALSE)
+{
+  ans = NextMethod()
+  class(ans) = class(x)
+  ans
+}
+
+# The following is not called
+setMethod("[", "HTMLFormElementsList",
+            function(x, i, j, ..., drop = FALSE) {
+             ans = callNextMethod()
+             class(ans) = class(x)
+             ans
+           }          
+          )
 
 if(FALSE) {
    # We don't actually need these. They are more covenience routines and since
@@ -78,18 +97,18 @@ setOldClass("HTMLFormAttributes")
 setOldClass("HTMLFormElementsList")
 
 
-setGeneric("formQuery", function(args, url, formElements, formAttributes, ..., .opts = list(), .checkArgs = TRUE)
+setGeneric("formQuery", function(args, url, formElements, formAttributes, ..., .opts = list(), .checkArgs = TRUE, .cleanArgs = NULL)
                            standardGeneric("formQuery"))
 
 setMethod("formQuery",
           signature("ANY", "missing", "HTMLFormDescription"),
-          function(args, url, formElements, formAttributes, ..., .opts = list(), .checkArgs = TRUE) {
+          function(args, url, formElements, formAttributes, ..., .opts = list(), .checkArgs = TRUE, .cleanArgs = NULL) {
             formQuery(args, formElements$url, formElements$elements, formElements$form, ..., .opts = .opts, .checkArgs = .checkArgs)
           })
 
 setMethod("formQuery",
           signature("ANY", "character", "HTMLFormDescription"),
-          function(args, url, formElements, formAttributes, ..., .opts = list(), .checkArgs = TRUE) {
+          function(args, url, formElements, formAttributes, ..., .opts = list(), .checkArgs = TRUE, .cleanArgs = NULL) {
             formQuery(args, url, formElements$elements, formElements$form, ..., .opts = .opts, .checkArgs = .checkArgs)
           })
 

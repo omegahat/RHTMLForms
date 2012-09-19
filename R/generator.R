@@ -26,7 +26,8 @@ function(formDescription, funcName,
           url = character(), con = paste("/tmp/", funcName, ".R", sep=""),
            insertFormDescription = TRUE, verbose = FALSE,
            formElements = NULL, addSubmit = TRUE,
-            processURLArgs = formDescription$formAttributes["method"] == "POST")
+           processURLArgs = formDescription$formAttributes["method"] == "POST",
+           cleanArgs = NULL)
 {
 
     # The caller should have already built the form description, either 
@@ -77,7 +78,7 @@ function(formDescription, funcName,
       exArgs = paste(sprintf("'%s' = '%s'", tmp[i], tmp[i+1]), collapse = ", ")
    }
      
-   arglist = createArgList(formDescription, formDescription$url, reader = reader, isPost = isPost)
+   arglist = createArgList(formDescription, formDescription$url, reader = reader, isPost = isPost, cleanArgs = cleanArgs)
      # Really want to synchronize these.
    argNames = names(getArgFormElements(els))
 #   argNames = escapeArgNames(argNames)
@@ -107,27 +108,33 @@ function(formDescription, funcName,
            file = con)
    }
 
-   cat("\targs = list(\n", paste(paste("\t\t", "'", argNames, "'", sep=""),
+   if(length(argNames))
+      cat("\targs = list(\n", paste(paste("\t\t", "'", argNames, "'", sep=""),
                                  #fixNames(argNames),
                                  escapeArgNames(argNames),
                                  sep=" = ", collapse=",\n"),
                      ")\n\n",
         file = con)
+   else
+       cat("\targs = list()\n\n", file = con)
    
 
        # Force url to be evaluated.
    cat("\n\n\n", "if(!length(.url))  stop('no url supplied')\n\n", file = con)
+
+#   cat("\n\n\n", "if(!is.null(.cleanArgs))  args = .cleanArgs(args, .formDescription)\n\n", file = con)
    
        # pass these to form and submit the query
    cat("\tans = formQuery(args, .url, .formDescription, ..., .opts = .opts",
                     ", .addSubmit = ", ifelse(addSubmit, "TRUE", "FALSE"), ", curl = .curl",
                     paste(", .extraArgs = c(", exArgs, ")"),
                     if(isPost) ", style = style",
+                    ", .cleanArgs = .cleanArgs",
                     ")\n", sep="", file = con)
 
 
      # Handle the case where we have a .reader function.
-   cat("\tif(!is.null(.reader) && is.function(.reader)) {\n\t\tif(inherits(.reader, 'AsIs'))\n\t\tans = .reader(ans)\n\telse {\n\tif(inherits(.reader, \"HTMLParseHandlerGenerator\"))\n\t\t\t.reader = .reader()\n\t\tans = htmlTreeParse(ans, asText = TRUE, handlers = .reader)\n\t\tif(inherits(ans, \"HTMLParseHandler\"))\n\t\t\tans = ans$value()\n}}\n\n", file = con)
+   cat("\tif(!is.null(.reader) && is.function(.reader)) {\n\t\tif(!inherits(.reader, 'AsIs'))\n\t\tans = .reader(ans)\n\telse {\n\tif(inherits(.reader, \"HTMLParseHandlerGenerator\"))\n\t\t\t.reader = .reader()\n\t\tans = htmlTreeParse(ans, asText = TRUE, handlers = .reader)\n\t\tif(inherits(ans, \"HTMLParseHandler\"))\n\t\t\tans = ans$value()\n}}\n\n", file = con)
    
    cat("\tans\n}\n\n\n", file = con)
 
@@ -151,7 +158,7 @@ function(x)
 escapeArgNames =
 function(els)
 {
-  i = grep("[-$@!#%]", els)
+  i = grep("[-$/@!#%]", els)
   if(length(i))
      els[i] = sprintf("`%s`", els[i])
   els
@@ -184,11 +191,12 @@ createFunction =
   #
 function(formDescription, url = character(), verbose = FALSE,
           formElements = NULL, addSubmit = TRUE, reader = NULL,
-           processURLArgs = formDescription$formAttributes["method"] == "POST")
+           processURLArgs = (formDescription$formAttributes["method"] == "POST"),
+           cleanArgs = NULL)
 {
   con = textConnection(".sillyName", "w", local = TRUE)
   writeFunction(formDescription, character(), url, con, verbose = verbose,
-                 insertFormDescription = FALSE, formElements = formElements, reader = reader)
+                 insertFormDescription = FALSE, formElements = formElements, reader = reader, cleanArgs = cleanArgs)
 
   on.exit(close(con))
    # Now read that object back into R as a function

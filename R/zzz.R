@@ -43,7 +43,8 @@ function(node, dropButtons = TRUE)
                                 })
   # ids = sapply(nodes, xmlGetAttr, "name")
 
-  ans = tapply(ans, ids, mergeElements)
+  if(any(duplicated(ids)))
+     ans = tapply(ans, ids, mergeElements)
 
   names(ans) = sapply(ans, `[[`, "name")
   class(ans) = "HTMLFormElementsList"
