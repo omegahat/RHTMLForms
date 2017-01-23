@@ -38,7 +38,7 @@ function(x)
     vals = sapply(optNodes, function(x) {
                             val = xmlGetAttr(x, "value", xmlGetAttr(x, "VALUE", NA))
                             if(is.na(val))
-                              val = xmlValue(x)
+                              val = XML:::trim(xmlValue(x))
 
                             val
                         })
