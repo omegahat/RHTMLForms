@@ -74,14 +74,17 @@ function(desc, args, all = TRUE,
           }
          )
 {
- desc =  desc$elements
 
+ desc =  desc$elements
+  
  # Two choices to handle errors:
  #  i) throw error immediately
  #  ii) cumulate errors and report all at the same time
 
  if(!inherits(desc, "HTMLFormElementsList"))
    stop("checkFormArgs requires an object of class HTMLFormElementList as the first argument.")
+
+
   
  errors = list()
 
@@ -193,9 +196,9 @@ function(desc, value, options = desc$options, multiOk = FALSE, ...)
      ok = par.match(value, names(options))
   }
 
-  if(any(is.na(ok))) {
+  if(any(is.na(ok))) 
      ok[is.na(ok)] = par.match(value[is.na(ok)], options)
-   }
+
 
   if(any(is.na(ok)))
     stop(desc$name, " must take  a value in the set: ",
