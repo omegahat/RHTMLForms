@@ -80,7 +80,7 @@ function(formDescription, funcName,
      
    arglist = createArgList(formDescription, formDescription$url, reader = reader, isPost = isPost, cleanArgs = cleanArgs)
      # Really want to synchronize these.
-   argNames = names(getArgFormElements(els))
+   argNames =  names(getArgFormElements(els)) 
 #   argNames = escapeArgNames(argNames)
 
 
@@ -125,7 +125,7 @@ function(formDescription, funcName,
 #   cat("\n\n\n", "if(!is.null(.cleanArgs))  args = .cleanArgs(args, .formDescription)\n\n", file = con)
    
        # pass these to form and submit the query
-   cat("\tans = formQuery(args, .url, .formDescription, ..., .opts = .opts",
+   cat("\tans = RHTMLForms::formQuery(args, .url, .formDescription, ..., .opts = .opts",
                     ", .addSubmit = ", ifelse(addSubmit, "TRUE", "FALSE"), ", curl = .curl",
                     paste(", .extraArgs = c(", exArgs, ")"),
                     if(isPost) ", style = style",
